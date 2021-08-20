@@ -29,13 +29,13 @@ Server-Sent Events (SSE) allows clients to receive updates from an HTTP server c
       2. The subnet Ids selected must be private to allow <a href="https://docs.aws.amazon.com/kinesisanalytics/latest/java/vpc-internet.html">outbound connections</a> from within an Amazon Kinesis Data Analytics Apache Flink application. 
       3. The security group Ids selected must allow outbound connections on the HTTP port required. In this sample we create an outbound connection on the standard HTTP port 80.
 3. Fill in the required parameters:
-   3. <b>S3Bucket</b> - The S3 bucket where the Amazon Kinesis Data Analytics application gets your application's JAR file
-   4. <b>S3StorageBucket</b> - The S3 bucket name used to store the server-sent events data
-   5. <b>S3StorageBucketPrefix</b> - The prefix used when storing server-sent events data into the S3 bucket
-   6. <b>S3StorageBucketErrorPrefix</b> - The prefix used when storing error events into the S3 bucket
-   7. <b>FlinkApplication</b> - The Apache Flink application jar file name located in the S3 bucket
-   8. *<b>Subnets</b> - The subnets used for the Amazon Kinesis Data Analytics application (When using an existing VPC template)
-   9. *<b>SecurityGroups</b> - The security groups used for the Amazon Kinesis Data Analytics application (When using an existing VPC template)
+   1. <b>S3Bucket</b> - The S3 bucket where the Amazon Kinesis Data Analytics application gets your application's JAR file
+   2. <b>S3StorageBucket</b> - The S3 bucket name used to store the server-sent events data
+   3. <b>S3StorageBucketPrefix</b> - The prefix used when storing server-sent events data into the S3 bucket
+   4. <b>S3StorageBucketErrorPrefix</b> - The prefix used when storing error events into the S3 bucket
+   5. <b>FlinkApplication</b> - The Apache Flink application jar file name located in the S3 bucket
+   6. *<b>Subnets</b> - The subnets used for the Amazon Kinesis Data Analytics application (When using an existing VPC template)
+   7. *<b>SecurityGroups</b> - The security groups used for the Amazon Kinesis Data Analytics application (When using an existing VPC template)
 
 ## Running
 1. The sample included will set up the Amazon Kinesis Data Analytics application to connect to the <a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams">wikimedia events streams</a> recent changes SSE endpoint.
