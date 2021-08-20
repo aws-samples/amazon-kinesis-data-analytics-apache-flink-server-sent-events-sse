@@ -62,6 +62,9 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
         createKinesisDataAnalyticsApplication();
     }
 
+    /***
+     * Create all the parameters required for the CloudFormation Template
+     */
     private void createParameters() {
         s3BucketParam = CfnParameter.Builder.create(this, "S3Bucket")
                 .type("String")
@@ -101,11 +104,17 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
         }
     }
 
+    /***
+     * Look up the bucket and make sure it exists before proceeding
+     */
     private void lookupBuckets() {
         s3Bucket = Bucket.fromBucketName(this, "S3BucketCheck", s3BucketParam.getValueAsString());
         s3StorageBucket = Bucket.fromBucketName(this, "S3StorageBucketCheck", s3StorageBucketParam.getValueAsString());
     }
 
+    /***
+     * If required this will create a VPC for the Kinesis Data Analytics application
+     */
     private void createVPC() {
         vpc = Vpc.Builder.create(this, "KinesisDataAnalyticsVPC")
                 .cidr("10.0.0.0/16")
@@ -122,14 +131,20 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
                 .build();
     }
 
+    /***
+     * This creates the Kinesis data streams stream which we publish the SSE events into
+     */
     private void createKinesisDataStream() {
-        outputDataStream = Stream.Builder.create(this, "KinesisServerSentEventsDataStreamA")
+        outputDataStream = Stream.Builder.create(this, "KinesisServerSentEventsDataStream")
                 .shardCount(1)
                 .retentionPeriod(Duration.hours(24))
                 .encryption(StreamEncryption.UNENCRYPTED)
                 .build();
     }
 
+    /***
+     * This creates the Kinesis Data Firehose which receives data from the data stream and pushes them to an S3 bucket
+     */
     private void createKinesisFirehose() {
         S3Bucket s3DestinationBucket = S3Bucket.Builder.create(s3StorageBucket)
                 .bufferingInterval(Duration.seconds(60))
@@ -163,6 +178,9 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
         return contentBuilder.toString();
     }
 
+    /***
+     * This creates the main Kinesis Data Analytics application
+     */
     private void createKinesisDataAnalyticsApplication() {
         Application application = Application.Builder.create(this, "KinesisAnalyticsServerSentEventsApplication")
                 .parallelismPerKpu(1)
@@ -171,6 +189,8 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
                 .code(ApplicationCode.fromBucket(s3Bucket, filenameParam.getValueAsString()))
                 .autoScalingEnabled(false)
                 .build();
+
+        // From https://docs.aws.amazon.com/kinesisanalytics/latest/java/vpc-permissions.html
         application.addToRolePolicy(PolicyStatement.Builder.create()
                 .resources(List.of("*"))
                 .actions(List.of(
@@ -191,8 +211,19 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
                 ))
                 .effect(Effect.ALLOW)
                 .build());
+        //Grant the application permission to publish SSE events to the data stream
         outputDataStream.grantReadWrite(application);
 
+        createKinesisAnalyticsInit(application);
+    }
+
+    /***
+     * This Lambda is run on create to setup the Kinesis Data Analytics application
+     * Current CloudFormation and CDK do not handle VPC and Properties for Analytics applications
+     * This function will update the application after it is created with the correct VPC and properties
+     * @param application The Kinesis Data Analytics application to initialize the VPC and setup the properties
+     */
+    private void createKinesisAnalyticsInit(Application application) {
         String functionCode = readFile("lambda/KinesisAnalyticsSetup.js");
 
         Map<String, String> environmentProperties = new HashMap<>();
@@ -200,14 +231,14 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
         environmentProperties.put("OutputStream", outputDataStream.getStreamName());
 
         final SingletonFunction lambdaFunction = SingletonFunction.Builder.create(this, "KinesisAnalyticsInit")
-                        .description("Initialize the Amazon Kinesis Data Analytics application")
-                        .code(Code.fromInline(functionCode))
-                        .handler("index.handler")
-                        .timeout(Duration.seconds(30))
-                        .runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_12_X)
-                        .uuid(java.util.UUID.randomUUID().toString())
-                        .environment(environmentProperties)
-                        .build();
+                .description("Initialize the Amazon Kinesis Data Analytics application")
+                .code(Code.fromInline(functionCode))
+                .handler("index.handler")
+                .timeout(Duration.seconds(30))
+                .runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_12_X)
+                .uuid(java.util.UUID.randomUUID().toString())
+                .environment(environmentProperties)
+                .build();
 
         lambdaFunction.addToRolePolicy(PolicyStatement.Builder.create()
                 .resources(List.of(application.getApplicationArn()))
@@ -219,10 +250,6 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
                 .effect(Effect.ALLOW)
                 .build());
 
-        createKinesisAnalyticsInit(lambdaFunction);
-    }
-
-    private void createKinesisAnalyticsInit(SingletonFunction lambdaFunction) {
         Map<String, Object> resourceProperties = new HashMap<>();
         Map<String, Object> vpcConfig = new HashMap<>();
         vpcConfig.put("SecurityGroupIds", this.createVPC ? List.of(securityGroup.getSecurityGroupId()) : securityGroupIdsParam.getValueAsList());

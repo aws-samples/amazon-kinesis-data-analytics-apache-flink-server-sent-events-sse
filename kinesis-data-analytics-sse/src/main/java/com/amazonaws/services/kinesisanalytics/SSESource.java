@@ -75,6 +75,7 @@ public class SSESource extends RichSourceFunction<String> {
                 requestBuilder = requestBuilder.headers(Headers.of(splitHeaders));
             }
 
+            // Create a request and connect using the standard headers for SSE endpoints
             Request request = requestBuilder
                     .url(url)
                     .header("Accept-Encoding", "")
@@ -87,6 +88,8 @@ public class SSESource extends RichSourceFunction<String> {
             logger.info("SSESource connected");
             try {
                 long startTime = System.currentTimeMillis();
+                // while we are connected and running we need to hold this thread and report messages recieved if that option is enabled.
+                // SSE events are sent via a callback in another thread
                 while (isRunning && isConnected) {
                     Thread.sleep(100);
                     long endTime = System.currentTimeMillis();
@@ -108,6 +111,9 @@ public class SSESource extends RichSourceFunction<String> {
         isRunning = false;
     }
 
+    /***
+     * This call will handle the actual SSE events and publish them to the Kinesis Data Streams stream via the collect call
+     */
     public final class EventSourceSender extends EventSourceListener {
         Logger logger;
         SourceContext<String> sourceContext;
@@ -119,10 +125,22 @@ public class SSESource extends RichSourceFunction<String> {
             this.collectTypes = collectTypes;
         }
 
+        /***
+         * Callback when the SSE endpoint connection is made. Currently all that is done is to log the event.
+         * @param eventSource the event source
+         * @param response the response
+         */
         @Override public void onOpen(EventSource eventSource, Response response) {
             logger.info("SSESource open");
         }
 
+        /***
+         * For each event received from the SSE endpoint we check if its a type requested and then publish to the Kinesis Data Streams stream via the collect call
+         * @param eventSource The event source
+         * @param id The id of the event
+         * @param type The type of the event which is used to filter
+         * @param data The event data
+         */
         @Override public void onEvent(EventSource eventSource, String id, String type, String data) {
             if (collectTypes == null || collectTypes.contains(type)) {
                 if (reportMessagesReceivedMS > 0) {
@@ -132,10 +150,21 @@ public class SSESource extends RichSourceFunction<String> {
             }
         }
 
+        /***
+         * When the connection is closed we receive this even which is currently only logged.
+         * @param eventSource The event source
+         */
         @Override public void onClosed(EventSource eventSource) {
             logger.info("SSESource closed");
         }
 
+        /***
+         * If there is any failure we log the error and the stack trace
+         * During stream resets with no errors we set the isConnected flag to false to allow the main thread to attempt a re-connect
+         * @param eventSource The event source
+         * @param t The error object
+         * @param response The response
+         */
         @Override
         public void onFailure(EventSource eventSource, Throwable t, Response response) {
             logger.error("SSESource Error: " + t.getMessage());
