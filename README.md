@@ -37,12 +37,12 @@ Server-Sent Events (SSE) allows clients to receive updates from an HTTP server c
    8. *<b>Subnets</b> - The subnets used for the Amazon Kinesis Data Analytics application (When using an existing VPC template)
    9. *<b>SecurityGroups</b> - The security groups used for the Amazon Kinesis Data Analytics application (When using an existing VPC template)
 
-##Running
+## Running
 1. The sample included will set up the Amazon Kinesis Data Analytics application to connect to the <a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams">wikimedia events streams</a> recent changes SSE endpoint.
 2. <a href="https://docs.aws.amazon.com/kinesisanalytics/latest/java/get-started-exercise.html#get-started-exercise-7">Run the Kinesis Data Analytics Application</a> from the console or cli
 3. Once the application is running, navigate to the S3 bucket supplied in the CloudFormation properties and view the event data records
 
-##SSE Endpoints
+## SSE Endpoints
 To connect to a different endpoint you can edit the <a href="https://docs.aws.amazon.com/kinesisanalytics/latest/java/how-properties.html#how-properties-console">Amazon Kinesis Data Analytics Runtime Properties</a>. The following properties are available:
    1. Property Group: <b>ProducerConfigProperties</b>
       1. The key value pair properties in this group are fed directly into the FlinkKinesisProducer, please reference <a href="https://github.com/awslabs/amazon-kinesis-producer/blob/master/java/amazon-kinesis-producer-sample/default_config.properties">these properties</a>
