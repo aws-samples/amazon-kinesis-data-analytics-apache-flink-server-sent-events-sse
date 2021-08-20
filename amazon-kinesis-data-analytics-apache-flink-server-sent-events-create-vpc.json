@@ -1,0 +1,1140 @@
+{
+  "Parameters": {
+    "S3Bucket": {
+      "Type": "String",
+      "AllowedPattern": ".+",
+      "Description": "The S3 bucket where the Amazon Kinesis Data Analytics application gets your application's JAR file"
+    },
+    "S3StorageBucket": {
+      "Type": "String",
+      "AllowedPattern": ".+",
+      "Description": "The S3 bucket name used to store the server-sent events data"
+    },
+    "S3StorageBucketPrefix": {
+      "Type": "String",
+      "Default": "sse-data",
+      "Description": "The prefix used when storing server-sent events data into the S3 bucket"
+    },
+    "S3StorageBucketErrorPrefix": {
+      "Type": "String",
+      "Default": "sse-error",
+      "Description": "The prefix used when storing error events into the S3 bucket"
+    },
+    "FlinkApplication": {
+      "Type": "String",
+      "Default": "amazon-kinesis-data-analytics-apache-flink-server-sent-events-1.0.0.jar",
+      "AllowedPattern": ".+",
+      "Description": "The Apache Flink application jar filename located in the S3 bucket"
+    }
+  },
+  "Resources": {
+    "KinesisDataAnalyticsVPC136D73E6": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC/KinesisDataAnalyticsVPC"
+          }
+        ]
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet1Subnet04A279DF": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/24",
+        "VpcId": {
+          "Ref": "KinesisDataAnalyticsVPC136D73E6"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Kinesis-SSE-Private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC/KinesisDataAnalyticsVPC/Kinesis-SSE-PrivateSubnet1"
+          }
+        ]
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet1RouteTableBED7E160": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "KinesisDataAnalyticsVPC136D73E6"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC/KinesisDataAnalyticsVPC/Kinesis-SSE-PrivateSubnet1"
+          }
+        ]
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet1RouteTableAssociation884CDD13": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet1RouteTableBED7E160"
+        },
+        "SubnetId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet1Subnet04A279DF"
+        }
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet1DefaultRouteA265E53C": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet1RouteTableBED7E160"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1NATGateway132B2369"
+        }
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet2SubnetB0B3B8B6": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.1.0/24",
+        "VpcId": {
+          "Ref": "KinesisDataAnalyticsVPC136D73E6"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Kinesis-SSE-Private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC/KinesisDataAnalyticsVPC/Kinesis-SSE-PrivateSubnet2"
+          }
+        ]
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet2RouteTable47502EA3": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "KinesisDataAnalyticsVPC136D73E6"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC/KinesisDataAnalyticsVPC/Kinesis-SSE-PrivateSubnet2"
+          }
+        ]
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet2RouteTableAssociation03B3400A": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet2RouteTable47502EA3"
+        },
+        "SubnetId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet2SubnetB0B3B8B6"
+        }
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet2DefaultRouteC52A75D0": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet2RouteTable47502EA3"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1NATGateway132B2369"
+        }
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1Subnet60443033": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.2.0/24",
+        "VpcId": {
+          "Ref": "KinesisDataAnalyticsVPC136D73E6"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Kinesis-SSE-Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC/KinesisDataAnalyticsVPC/Kinesis-SSE-PublicSubnet1"
+          }
+        ]
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1RouteTableCEC415B8": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "KinesisDataAnalyticsVPC136D73E6"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC/KinesisDataAnalyticsVPC/Kinesis-SSE-PublicSubnet1"
+          }
+        ]
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1RouteTableAssociation3675A437": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1RouteTableCEC415B8"
+        },
+        "SubnetId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1Subnet60443033"
+        }
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1DefaultRoute76C9B877": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1RouteTableCEC415B8"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "KinesisDataAnalyticsVPCIGW2F20B2ED"
+        }
+      },
+      "DependsOn": [
+        "KinesisDataAnalyticsVPCVPCGW35D63198"
+      ]
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1EIP79D3A0E9": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC/KinesisDataAnalyticsVPC/Kinesis-SSE-PublicSubnet1"
+          }
+        ]
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1NATGateway132B2369": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1Subnet60443033"
+        },
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet1EIP79D3A0E9",
+            "AllocationId"
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC/KinesisDataAnalyticsVPC/Kinesis-SSE-PublicSubnet1"
+          }
+        ]
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet2Subnet98F6DFE5": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.3.0/24",
+        "VpcId": {
+          "Ref": "KinesisDataAnalyticsVPC136D73E6"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Kinesis-SSE-Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC/KinesisDataAnalyticsVPC/Kinesis-SSE-PublicSubnet2"
+          }
+        ]
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet2RouteTableD5A6D3B3": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "KinesisDataAnalyticsVPC136D73E6"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC/KinesisDataAnalyticsVPC/Kinesis-SSE-PublicSubnet2"
+          }
+        ]
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet2RouteTableAssociation53F19D7C": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet2RouteTableD5A6D3B3"
+        },
+        "SubnetId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet2Subnet98F6DFE5"
+        }
+      }
+    },
+    "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet2DefaultRouteB3E1A20D": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "KinesisDataAnalyticsVPCKinesisSSEPublicSubnet2RouteTableD5A6D3B3"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "KinesisDataAnalyticsVPCIGW2F20B2ED"
+        }
+      },
+      "DependsOn": [
+        "KinesisDataAnalyticsVPCVPCGW35D63198"
+      ]
+    },
+    "KinesisDataAnalyticsVPCIGW2F20B2ED": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC/KinesisDataAnalyticsVPC"
+          }
+        ]
+      }
+    },
+    "KinesisDataAnalyticsVPCVPCGW35D63198": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "KinesisDataAnalyticsVPC136D73E6"
+        },
+        "InternetGatewayId": {
+          "Ref": "KinesisDataAnalyticsVPCIGW2F20B2ED"
+        }
+      }
+    },
+    "KinesisDataAnalyticsSecurityGroupDAFCA50F": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for Server-Sent Events",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "KinesisDataAnalyticsVPC136D73E6"
+        }
+      }
+    },
+    "KinesisServerSentEventsDataStreamA9A0D9DF0": {
+      "Type": "AWS::Kinesis::Stream",
+      "Properties": {
+        "ShardCount": 1,
+        "RetentionPeriodHours": 24
+      }
+    },
+    "KinesisFirehoseS3DeliveryServiceRole161C0743": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "firehose.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "KinesisFirehoseS3DeliveryServiceRoleDefaultPolicy41331D93": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "kinesis:DescribeStreamSummary",
+                "kinesis:GetRecords",
+                "kinesis:GetShardIterator",
+                "kinesis:ListShards",
+                "kinesis:SubscribeToShard",
+                "kinesis:DescribeStream"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "KinesisServerSentEventsDataStreamA9A0D9DF0",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "KinesisFirehoseS3DeliveryServiceRoleDefaultPolicy41331D93",
+        "Roles": [
+          {
+            "Ref": "KinesisFirehoseS3DeliveryServiceRole161C0743"
+          }
+        ]
+      }
+    },
+    "KinesisFirehoseS3DeliveryS3DestinationRoleB687076B": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "firehose.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "KinesisFirehoseS3DeliveryS3DestinationRoleDefaultPolicyC2E014A6": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject*",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "S3StorageBucket"
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "S3StorageBucket"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "KinesisFirehoseS3DeliveryLogGroupDA9D03DA",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "KinesisFirehoseS3DeliveryS3DestinationRoleDefaultPolicyC2E014A6",
+        "Roles": [
+          {
+            "Ref": "KinesisFirehoseS3DeliveryS3DestinationRoleB687076B"
+          }
+        ]
+      }
+    },
+    "KinesisFirehoseS3DeliveryLogGroupDA9D03DA": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "RetentionInDays": 731
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain"
+    },
+    "KinesisFirehoseS3DeliveryLogGroupS3DestinationACEB009D": {
+      "Type": "AWS::Logs::LogStream",
+      "Properties": {
+        "LogGroupName": {
+          "Ref": "KinesisFirehoseS3DeliveryLogGroupDA9D03DA"
+        }
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain"
+    },
+    "KinesisFirehoseS3DeliveryE807D61C": {
+      "Type": "AWS::KinesisFirehose::DeliveryStream",
+      "Properties": {
+        "DeliveryStreamType": "KinesisStreamAsSource",
+        "ExtendedS3DestinationConfiguration": {
+          "BucketARN": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":s3:::",
+                {
+                  "Ref": "S3StorageBucket"
+                }
+              ]
+            ]
+          },
+          "BufferingHints": {
+            "IntervalInSeconds": 60,
+            "SizeInMBs": 5
+          },
+          "CloudWatchLoggingOptions": {
+            "Enabled": true,
+            "LogGroupName": {
+              "Ref": "KinesisFirehoseS3DeliveryLogGroupDA9D03DA"
+            },
+            "LogStreamName": {
+              "Ref": "KinesisFirehoseS3DeliveryLogGroupS3DestinationACEB009D"
+            }
+          },
+          "ErrorOutputPrefix": {
+            "Ref": "S3StorageBucketErrorPrefix"
+          },
+          "Prefix": {
+            "Ref": "S3StorageBucketPrefix"
+          },
+          "RoleARN": {
+            "Fn::GetAtt": [
+              "KinesisFirehoseS3DeliveryS3DestinationRoleB687076B",
+              "Arn"
+            ]
+          }
+        },
+        "KinesisStreamSourceConfiguration": {
+          "KinesisStreamARN": {
+            "Fn::GetAtt": [
+              "KinesisServerSentEventsDataStreamA9A0D9DF0",
+              "Arn"
+            ]
+          },
+          "RoleARN": {
+            "Fn::GetAtt": [
+              "KinesisFirehoseS3DeliveryServiceRole161C0743",
+              "Arn"
+            ]
+          }
+        }
+      },
+      "DependsOn": [
+        "KinesisFirehoseS3DeliveryS3DestinationRoleDefaultPolicyC2E014A6",
+        "KinesisFirehoseS3DeliveryServiceRoleDefaultPolicy41331D93"
+      ]
+    },
+    "KinesisAnalyticsServerSentEventsApplicationRole37FA4990": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "kinesisanalytics.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "KinesisAnalyticsServerSentEventsApplicationRoleDefaultPolicy35941F86": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "S3Bucket"
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "S3Bucket"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": "logs:DescribeLogGroups",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":logs:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":log-group:*"
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": "logs:DescribeLogStreams",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "KinesisAnalyticsServerSentEventsApplicationLogGroup1870CD29",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": "logs:PutLogEvents",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":logs:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":log-group:",
+                    {
+                      "Ref": "KinesisAnalyticsServerSentEventsApplicationLogGroup1870CD29"
+                    },
+                    ":log-stream:",
+                    {
+                      "Ref": "KinesisAnalyticsServerSentEventsApplicationLogStream9F10C1D5"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": [
+                "ec2:DescribeVpcs",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeDhcpOptions"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "ec2:CreateNetworkInterface",
+                "ec2:CreateNetworkInterfacePermission",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DeleteNetworkInterface"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "kinesis:DescribeStreamSummary",
+                "kinesis:GetRecords",
+                "kinesis:GetShardIterator",
+                "kinesis:ListShards",
+                "kinesis:SubscribeToShard",
+                "kinesis:PutRecord",
+                "kinesis:PutRecords"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "KinesisServerSentEventsDataStreamA9A0D9DF0",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "KinesisAnalyticsServerSentEventsApplicationRoleDefaultPolicy35941F86",
+        "Roles": [
+          {
+            "Ref": "KinesisAnalyticsServerSentEventsApplicationRole37FA4990"
+          }
+        ]
+      }
+    },
+    "KinesisAnalyticsServerSentEventsApplication821A3B97": {
+      "Type": "AWS::KinesisAnalyticsV2::Application",
+      "Properties": {
+        "RuntimeEnvironment": "FLINK-1_11",
+        "ServiceExecutionRole": {
+          "Fn::GetAtt": [
+            "KinesisAnalyticsServerSentEventsApplicationRole37FA4990",
+            "Arn"
+          ]
+        },
+        "ApplicationConfiguration": {
+          "ApplicationCodeConfiguration": {
+            "CodeContent": {
+              "S3ContentLocation": {
+                "BucketARN": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "S3Bucket"
+                      }
+                    ]
+                  ]
+                },
+                "FileKey": {
+                  "Ref": "FlinkApplication"
+                }
+              }
+            },
+            "CodeContentType": "ZIPFILE"
+          },
+          "ApplicationSnapshotConfiguration": {
+            "SnapshotsEnabled": true
+          },
+          "FlinkApplicationConfiguration": {
+            "ParallelismConfiguration": {
+              "AutoScalingEnabled": false,
+              "ConfigurationType": "CUSTOM",
+              "Parallelism": 1,
+              "ParallelismPerKPU": 1
+            }
+          }
+        }
+      },
+      "DependsOn": [
+        "KinesisAnalyticsServerSentEventsApplicationRoleDefaultPolicy35941F86",
+        "KinesisAnalyticsServerSentEventsApplicationRole37FA4990"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "KinesisAnalyticsServerSentEventsApplicationLogGroup1870CD29": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "RetentionInDays": 731
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain"
+    },
+    "KinesisAnalyticsServerSentEventsApplicationLogStream9F10C1D5": {
+      "Type": "AWS::Logs::LogStream",
+      "Properties": {
+        "LogGroupName": {
+          "Ref": "KinesisAnalyticsServerSentEventsApplicationLogGroup1870CD29"
+        }
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain"
+    },
+    "KinesisAnalyticsServerSentEventsApplicationLoggingOption8ED90FE6": {
+      "Type": "AWS::KinesisAnalyticsV2::ApplicationCloudWatchLoggingOption",
+      "Properties": {
+        "ApplicationName": {
+          "Ref": "KinesisAnalyticsServerSentEventsApplication821A3B97"
+        },
+        "CloudWatchLoggingOption": {
+          "LogStreamARN": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":logs:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId"
+                },
+                ":log-group:",
+                {
+                  "Ref": "KinesisAnalyticsServerSentEventsApplicationLogGroup1870CD29"
+                },
+                ":log-stream:",
+                {
+                  "Ref": "KinesisAnalyticsServerSentEventsApplicationLogStream9F10C1D5"
+                }
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "SingletonLambda3283ae11546b46969715903487c64f71ServiceRole5D84D5BF": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "SingletonLambda3283ae11546b46969715903487c64f71ServiceRoleDefaultPolicy4CF5E967": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "kinesisanalytics:UpdateApplication",
+                "kinesisanalytics:DescribeApplication",
+                "kinesisanalytics:AddApplicationVpcConfiguration"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":kinesisanalytics:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":application/",
+                    {
+                      "Ref": "KinesisAnalyticsServerSentEventsApplication821A3B97"
+                    }
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "SingletonLambda3283ae11546b46969715903487c64f71ServiceRoleDefaultPolicy4CF5E967",
+        "Roles": [
+          {
+            "Ref": "SingletonLambda3283ae11546b46969715903487c64f71ServiceRole5D84D5BF"
+          }
+        ]
+      }
+    },
+    "SingletonLambda3283ae11546b46969715903487c64f7126D2F963": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "ZipFile": "// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\n// SPDX-License-Identifier: MIT-0\n\nconst AWS = require('aws-sdk');\nconst response = require('cfn-response');\nvar kinesisanalyticsv2 = new AWS.KinesisAnalyticsV2();\nexports.handler = (event, context) => {\n    console.info(\"Event: \" + JSON.stringify(event));\n    if (event.RequestType == \"Create\") {\n        try {\n            kinesisanalyticsv2.describeApplication({\n                ApplicationName: process.env.ApplicationName,\n                IncludeAdditionalDetails: true\n            }, function(err, app) {\n                if (err) {\n                    response.send(event, context, response.FAILED, err);\n                }\n                else {\n                    kinesisanalyticsv2.updateApplication({\n                        \"ApplicationName\": process.env.ApplicationName,\n                        \"CurrentApplicationVersionId\": app.ApplicationDetail.ApplicationVersionId,\n                        \"ApplicationConfigurationUpdate\": {\n                            \"EnvironmentPropertyUpdates\": {\n                                \"PropertyGroups\": [\n                                    {\n                                        \"PropertyGroupId\": \"ProducerConfigProperties\",\n                                        \"PropertyMap\": {\n                                            \"AggregationEnabled\" : \"false\",\n                                            \"aws.region\" : process.env.AWS_REGION\n                                        }\n                                    },\n                                    {\n                                        \"PropertyGroupId\": \"OutputStreamProperties\",\n                                        \"PropertyMap\": {\n                                            \"DefaultStream\" : process.env.OutputStream\n                                        }\n                                    },\n                                    {\n                                        \"PropertyGroupId\": \"SSESourceProperties\",\n                                        \"PropertyMap\": {\n                                            \"url\" : \"https://stream.wikimedia.org/v2/stream/recentchange\"\n                                        }\n                                    }\n                                ]\n                            }\n                        }\n                    }, function (err, update) {\n                        if (err) {\n                            response.send(event, context, response.FAILED, err);\n                        } else {\n                            kinesisanalyticsv2.addApplicationVpcConfiguration({\n                                \"ApplicationName\": process.env.ApplicationName,\n                                \"VpcConfiguration\": event.ResourceProperties.VpcConfiguration,\n                                \"CurrentApplicationVersionId\": app.ApplicationDetail.ApplicationVersionId + 1\n                            }, function (err, vpcConfig) {\n                                if (err) {\n                                    response.send(event, context, response.FAILED, err);\n                                } else {\n                                    response.send(event, context, response.SUCCESS, {});\n                                }\n                            });\n                        }\n                    });\n                }\n            });\n        }\n        catch (err) {\n            response.send(event, context, response.FAILED, err);\n        }\n    }\n    else {\n        response.send(event, context, response.SUCCESS, {});\n    }\n};\n"
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "SingletonLambda3283ae11546b46969715903487c64f71ServiceRole5D84D5BF",
+            "Arn"
+          ]
+        },
+        "Description": "Initialize the Amazon Kinesis Data Analytics application",
+        "Environment": {
+          "Variables": {
+            "ApplicationName": {
+              "Ref": "KinesisAnalyticsServerSentEventsApplication821A3B97"
+            },
+            "OutputStream": {
+              "Ref": "KinesisServerSentEventsDataStreamA9A0D9DF0"
+            }
+          }
+        },
+        "Handler": "index.handler",
+        "Runtime": "nodejs12.x",
+        "Timeout": 30
+      },
+      "DependsOn": [
+        "SingletonLambda3283ae11546b46969715903487c64f71ServiceRoleDefaultPolicy4CF5E967",
+        "SingletonLambda3283ae11546b46969715903487c64f71ServiceRole5D84D5BF"
+      ]
+    },
+    "KinesisAnalyticsInitResourceVPC": {
+      "Type": "AWS::CloudFormation::CustomResource",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "SingletonLambda3283ae11546b46969715903487c64f7126D2F963",
+            "Arn"
+          ]
+        },
+        "VpcConfiguration": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "KinesisDataAnalyticsSecurityGroupDAFCA50F",
+                "GroupId"
+              ]
+            }
+          ],
+          "SubnetIds": [
+            {
+              "Ref": "KinesisDataAnalyticsVPCKinesisSSEPrivateSubnet1Subnet04A279DF"
+            }
+          ]
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    }
+  },
+  "Mappings": {
+    "awscdkawskinesisfirehoseCidrBlocks": {
+      "af-south-1": {
+        "FirehoseCidrBlock": "13.244.121.224/27"
+      },
+      "ap-east-1": {
+        "FirehoseCidrBlock": "18.162.221.32/27"
+      },
+      "ap-northeast-1": {
+        "FirehoseCidrBlock": "13.113.196.224/27"
+      },
+      "ap-northeast-2": {
+        "FirehoseCidrBlock": "13.209.1.64/27"
+      },
+      "ap-northeast-3": {
+        "FirehoseCidrBlock": "13.208.177.192/27"
+      },
+      "ap-south-1": {
+        "FirehoseCidrBlock": "13.232.67.32/27"
+      },
+      "ap-southeast-1": {
+        "FirehoseCidrBlock": "13.228.64.192/27"
+      },
+      "ap-southeast-2": {
+        "FirehoseCidrBlock": "13.210.67.224/27"
+      },
+      "ca-central-1": {
+        "FirehoseCidrBlock": "35.183.92.128/27"
+      },
+      "cn-north-1": {
+        "FirehoseCidrBlock": "52.81.151.32/27"
+      },
+      "cn-northwest-1": {
+        "FirehoseCidrBlock": "161.189.23.64/27"
+      },
+      "eu-central-1": {
+        "FirehoseCidrBlock": "35.158.127.160/27"
+      },
+      "eu-north-1": {
+        "FirehoseCidrBlock": "13.53.63.224/27"
+      },
+      "eu-south-1": {
+        "FirehoseCidrBlock": "15.161.135.128/27"
+      },
+      "eu-west-1": {
+        "FirehoseCidrBlock": "52.19.239.192/27"
+      },
+      "eu-west-2": {
+        "FirehoseCidrBlock": "18.130.1.96/27"
+      },
+      "eu-west-3": {
+        "FirehoseCidrBlock": "35.180.1.96/27"
+      },
+      "me-south-1": {
+        "FirehoseCidrBlock": "15.185.91.0/27"
+      },
+      "sa-east-1": {
+        "FirehoseCidrBlock": "18.228.1.128/27"
+      },
+      "us-east-1": {
+        "FirehoseCidrBlock": "52.70.63.192/27"
+      },
+      "us-east-2": {
+        "FirehoseCidrBlock": "13.58.135.96/27"
+      },
+      "us-gov-east-1": {
+        "FirehoseCidrBlock": "18.253.138.96/27"
+      },
+      "us-gov-west-1": {
+        "FirehoseCidrBlock": "52.61.204.160/27"
+      },
+      "us-west-1": {
+        "FirehoseCidrBlock": "13.57.135.192/27"
+      },
+      "us-west-2": {
+        "FirehoseCidrBlock": "52.89.255.224/27"
+      }
+    }
+  }
+}
