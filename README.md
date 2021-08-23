@@ -10,6 +10,16 @@ When dealing with real-time data it is often required to send that data over the
 1. The <a href="https://aws.amazon.com/kinesis/data-firehose">Amazon Kinesis Data Firehose</a> receives the event payload from the data stream
 1. The <a href="https://aws.amazon.com/s3/">Amazon Simple Storage Service</a> bucket is used to store the events for future analysis
 
+## Example SSE use cases:
+1. https://developers.facebook.com/docs/graph-api/server-sent-events/
+   1. Facebook uses SSE to send out updates for live video comments and reactions
+2. https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams
+   2. Wikimedia uses SSE to send all changes to wiki sites
+3. https://iexcloud.io/docs/api/#sse-streaming
+   1. IEX uses SSE to stream realtime stock quotes
+4. https://www.mbta.com/developers/v3-api/streaming
+   1. MBTA uses SSE to stream realtime transportation predictions
+  
 ## Requirements To Compile
 1. Maven installed
 2. Java 11 installed
@@ -28,12 +38,13 @@ When dealing with real-time data it is often required to send that data over the
       1. This template will allow you to select existing security group Ids and subnet Ids to use with the application
       2. The subnet Ids selected must be private to allow <a href="https://docs.aws.amazon.com/kinesisanalytics/latest/java/vpc-internet.html">outbound connections</a> from within an Amazon Kinesis Data Analytics Apache Flink application. 
       3. The security group Ids selected must allow outbound connections on the HTTP port required. In this sample we create an outbound connection on the standard HTTP port 80.
-3. Fill in the required parameters:
+3. Use one of the generated <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/GettingStarted.html">CloudFormation Templates</a> from the console or CLI
+4. Fill in the required parameters:
    1. <b>S3Bucket</b> - The S3 bucket where the Amazon Kinesis Data Analytics application gets your application's JAR file
    2. <b>S3StorageBucket</b> - The S3 bucket name used to store the server-sent events data
    3. <b>S3StorageBucketPrefix</b> - The prefix used when storing server-sent events data into the S3 bucket
    4. <b>S3StorageBucketErrorPrefix</b> - The prefix used when storing error events into the S3 bucket
-   5. <b>FlinkApplication</b> - The Apache Flink application jar file name located in the S3 bucket
+   5. <b>FlinkApplication</b> - The Apache Flink application jar filename located in the S3 bucket
    6. *<b>Subnets</b> - The subnets used for the Amazon Kinesis Data Analytics application (When using an existing VPC template)
    7. *<b>SecurityGroups</b> - The security groups used for the Amazon Kinesis Data Analytics application (When using an existing VPC template)
 
@@ -55,17 +66,6 @@ To connect to a different endpoint you can edit the <a href="https://docs.aws.am
       1. <b>types</b> - A pipe delimited set of SSE event types to send to the data stream.
       1. <b>readTimeoutMS</b> - The read timeout value in milliseconds. Note in most cases adjusting this to anything but zero will cause the system to not connect.
       1. <b>reportMessagesReceivedMS</b> - How often to log the number of messages received over a given period of time in milliseconds.
-
-## Example SSE use cases:
-
-* https://developers.facebook.com/docs/graph-api/server-sent-events/
-    * Facebook uses SSE to send out updates for live video comments and reactions
-* https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams
-    * Wikimedia uses SSE to send all changes to wiki sites
-* https://iexcloud.io/docs/api/#sse-streaming
-    * IEX uses SSE to stream realtime stock quotes
-* https://www.mbta.com/developers/v3-api/streaming
-    * MBTA uses SSE to stream realtime transportation predictions
 
 ## Resource Cleanup
 ### CloudFormation
