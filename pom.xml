@@ -7,7 +7,7 @@
     <groupId>com.amazonaws</groupId>
     <artifactId>amazon-kinesis-data-analytics-apache-flink-server-sent-events-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>1.0.0</version>
     <name>Amazon Kinesis Data Analytics Apache Flink Server Sent Events (SSE) Parent Project</name>
 
     <modules>

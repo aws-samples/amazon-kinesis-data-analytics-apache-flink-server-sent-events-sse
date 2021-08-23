@@ -32,9 +32,9 @@ When dealing with real-time data it is often required to send that data over the
 ## Setup
 1. Upload the compiled jar file ('amazon-kinesis-data-analytics-apache-flink-server-sent-events-{version}.jar') to an S3 bucket in the account you plan to run. 
 2. The CDK will produce two different <a href="https://aws.amazon.com/cloudformation/resources/templates/">CloudFormation Templates</a>
-   1. amazon-kinesis-data-analytics-apache-flink-server-sent-events-create-vpc.json
+   1. amazon-kinesis-data-analytics-apache-flink-server-sent-events-create-vpc.template
       1. This template will create a VPC for you with private and public subnets
-   2. amazon-kinesis-data-analytics-apache-flink-server-sent-events-use-existing-vpc.json
+   2. amazon-kinesis-data-analytics-apache-flink-server-sent-events-use-existing-vpc.template
       1. This template will allow you to select existing security group Ids and subnet Ids to use with the application
       2. The subnet Ids selected must be private to allow <a href="https://docs.aws.amazon.com/kinesisanalytics/latest/java/vpc-internet.html">outbound connections</a> from within an Amazon Kinesis Data Analytics Apache Flink application. 
       3. The security group Ids selected must allow outbound connections on the HTTP port required. In this sample we create an outbound connection on the standard HTTP port 80.

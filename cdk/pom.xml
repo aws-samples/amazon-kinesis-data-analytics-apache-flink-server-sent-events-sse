@@ -5,7 +5,7 @@
 
     <groupId>com.myorg</groupId>
     <artifactId>amazon-kinesis-data-analytics-apache-flink-server-sent-events-sse-cdk</artifactId>
-    <version>0.1</version>
+    <version>1.0.0</version>
 
     <properties>
         <java.version>1.11</java.version>
@@ -70,7 +70,7 @@
                                 target/cdk.out/AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCreateVPC.template.json
                             </sourceFile>
                             <destinationFile>
-                                ${project.basedir}/../amazon-kinesis-data-analytics-apache-flink-server-sent-events-create-vpc.json
+                                ${project.basedir}/../amazon-kinesis-data-analytics-apache-flink-server-sent-events-create-vpc.template
                             </destinationFile>
                         </configuration>
                     </execution>
@@ -85,7 +85,7 @@
                                 target/cdk.out/AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseUseExistingVPC.template.json
                             </sourceFile>
                             <destinationFile>
-                                ${project.basedir}/../amazon-kinesis-data-analytics-apache-flink-server-sent-events-use-existing-vpc.json
+                                ${project.basedir}/../amazon-kinesis-data-analytics-apache-flink-server-sent-events-use-existing-vpc.template
                             </destinationFile>
                         </configuration>
                     </execution>
