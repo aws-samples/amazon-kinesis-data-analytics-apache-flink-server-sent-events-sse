@@ -56,6 +56,17 @@ To connect to a different endpoint you can edit the <a href="https://docs.aws.am
       1. <b>readTimeoutMS</b> - The read timeout value in milliseconds. Note in most cases adjusting this to anything but zero will cause the system to not connect.
       1. <b>reportMessagesReceivedMS</b> - How often to log the number of messages received over a given period of time in milliseconds.
 
+## Example SSE use cases:
+
+* https://developers.facebook.com/docs/graph-api/server-sent-events/
+    * Facebook uses SSE to send out updates for live video comments and reactions
+* https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams
+    * Wikimedia uses SSE to send all changes to wiki sites
+* https://iexcloud.io/docs/api/#sse-streaming
+    * IEX uses SSE to stream realtime stock quotes
+* https://www.mbta.com/developers/v3-api/streaming
+    * MBTA uses SSE to stream realtime transportation predictions
+
 ## Resource Cleanup
 ### CloudFormation
 1. Delete the CloudFormation stack
