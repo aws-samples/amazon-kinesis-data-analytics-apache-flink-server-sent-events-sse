@@ -14,7 +14,7 @@ When dealing with real-time data it is often required to send that data over the
 1. https://developers.facebook.com/docs/graph-api/server-sent-events/
    1. Facebook uses SSE to send out updates for live video comments and reactions
 2. https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams
-   2. Wikimedia uses SSE to send all changes to wiki sites
+   1. Wikimedia uses SSE to send all changes to wiki sites
 3. https://iexcloud.io/docs/api/#sse-streaming
    1. IEX uses SSE to stream realtime stock quotes
 4. https://www.mbta.com/developers/v3-api/streaming
