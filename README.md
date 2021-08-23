@@ -21,8 +21,8 @@ When dealing with real-time data it is often required to send that data over the
    1. MBTA uses SSE to stream realtime transportation predictions
   
 ## Requirements To Compile
-1. Maven installed
-2. Java 11 installed
+1. Apache Maven 3.5 or greater installed
+2. Java 11 or greater installed
 1. <a href="https://aws.amazon.com/cdk/">AWS Cloud Development Kit</a> (CDK)
 
 ## Compiling
