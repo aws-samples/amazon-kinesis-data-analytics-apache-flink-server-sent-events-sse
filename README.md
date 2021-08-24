@@ -57,7 +57,7 @@ When dealing with real-time data it is often required to send that data over the
 To connect to a different endpoint you can edit the <a href="https://docs.aws.amazon.com/kinesisanalytics/latest/java/how-properties.html#how-properties-console">Amazon Kinesis Data Analytics Runtime Properties</a>. The following properties are available:
    1. Property Group: <b>ProducerConfigProperties</b>
       1. The key value pair properties in this group are fed directly into the FlinkKinesisProducer, please reference <a href="https://github.com/awslabs/amazon-kinesis-producer/blob/master/java/amazon-kinesis-producer-sample/default_config.properties">these properties</a>
-      1. The key <b>AggregationEnabled</b> should ALWAYS be set to <b>false</b>
+      1. The key <b>AggregationEnabled</b> should be set to <b>false</b> when sending data to endpoints which cannot disaggregate the data. For example if AggregationEnabled is true and the data stream is ingested by an AWS Lambda function you will be required to disaggregate the data yourself inside the function.
    2. Property Group: <b>OutputStreamProperties</b>
       1. DefaultStream</b> - The value of this property should be the Amazon Kinesis Data Streams stream that this application will output events to. Please be aware that the security role for the Amazon Kinesis Data Analytics application will require permissions to this stream.
    3. Property Group: <b>SSESourceProperties</b>
