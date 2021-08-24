@@ -8,7 +8,7 @@ import software.amazon.awscdk.core.StackProps;
 
 public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkApp {
     public static void main(final String[] args) {
-        App app = new App();
+        final App app = new App();
 
         new AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack(
                 app,

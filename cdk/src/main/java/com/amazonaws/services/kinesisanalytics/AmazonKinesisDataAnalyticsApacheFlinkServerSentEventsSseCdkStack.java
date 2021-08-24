@@ -26,9 +26,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack extends Stack {
     private final boolean createVPC;
@@ -45,11 +44,11 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
     private Vpc vpc;
     private SecurityGroup securityGroup;
 
-    public AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack(final Construct scope, final String id, boolean createVPC) {
+    public AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack(final Construct scope, final String id, final boolean createVPC) {
         this(scope, id, null, createVPC);
     }
 
-    public AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack(final Construct scope, final String id, final StackProps props, boolean createVPC) {
+    public AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack(final Construct scope, final String id, final StackProps props, final boolean createVPC) {
         super(scope, id, props);
         this.createVPC = createVPC;
         createParameters();
@@ -146,7 +145,7 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
      * This creates the Kinesis Data Firehose which receives data from the data stream and pushes them to an S3 bucket
      */
     private void createKinesisFirehose() {
-        S3Bucket s3DestinationBucket = S3Bucket.Builder.create(s3StorageBucket)
+        final S3Bucket s3DestinationBucket = S3Bucket.Builder.create(s3StorageBucket)
                 .bufferingInterval(Duration.seconds(60))
                 .dataOutputPrefix(s3StoragePrefixParam.getValueAsString())
                 .errorOutputPrefix(s3StorageErrorPrefixParam.getValueAsString())
@@ -166,8 +165,8 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
      * @param filePath The full path to the file to read
      * @return The contents of the file
      */
-    private static String readFile(String filePath) {
-        StringBuilder contentBuilder = new StringBuilder();
+    private static String readFile(final String filePath) {
+        final StringBuilder contentBuilder = new StringBuilder();
 
         try (java.util.stream.Stream<String> stream = Files.lines(Paths.get(filePath), StandardCharsets.UTF_8)) {
             stream.forEach(s -> contentBuilder.append(s).append("\n"));
@@ -182,7 +181,7 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
      * This creates the main Kinesis Data Analytics application
      */
     private void createKinesisDataAnalyticsApplication() {
-        Application application = Application.Builder.create(this, "KinesisAnalyticsServerSentEventsApplication")
+        final Application application = Application.Builder.create(this, "KinesisAnalyticsServerSentEventsApplication")
                 .parallelismPerKpu(1)
                 .parallelism(1)
                 .runtime(Runtime.FLINK_1_11)
@@ -223,10 +222,10 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
      * This function will update the application after it is created with the correct VPC and properties
      * @param application The Kinesis Data Analytics application to initialize the VPC and setup the properties
      */
-    private void createKinesisAnalyticsInit(Application application) {
-        String functionCode = readFile("lambda/KinesisAnalyticsSetup.js");
+    private void createKinesisAnalyticsInit(final Application application) { //NOPMD - suppressed MethodArgumentCouldBeFinal - TODO explain reason for suppression
+        final String functionCode = readFile("lambda/KinesisAnalyticsSetup.js");
 
-        Map<String, String> environmentProperties = new HashMap<>();
+        final ConcurrentHashMap<String, String> environmentProperties = new ConcurrentHashMap<>();
         environmentProperties.put("ApplicationName", application.getApplicationName());
         environmentProperties.put("OutputStream", outputDataStream.getStreamName());
 
@@ -250,8 +249,8 @@ public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkStack ex
                 .effect(Effect.ALLOW)
                 .build());
 
-        Map<String, Object> resourceProperties = new HashMap<>();
-        Map<String, Object> vpcConfig = new HashMap<>();
+        final ConcurrentHashMap<String, Object> resourceProperties = new ConcurrentHashMap<>();
+        final ConcurrentHashMap<String, Object> vpcConfig = new ConcurrentHashMap<>();
         vpcConfig.put("SecurityGroupIds", this.createVPC ? List.of(securityGroup.getSecurityGroupId()) : securityGroupIdsParam.getValueAsList());
         vpcConfig.put("SubnetIds", this.createVPC ? List.of(vpc.getPrivateSubnets().get(0).getSubnetId()) : subnetIdsParam.getValueAsList());
         resourceProperties.put("VpcConfiguration", vpcConfig);
