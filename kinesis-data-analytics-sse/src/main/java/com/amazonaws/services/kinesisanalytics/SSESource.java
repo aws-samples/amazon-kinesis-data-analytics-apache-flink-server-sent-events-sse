@@ -10,6 +10,7 @@ import okhttp3.Response;
 import okhttp3.internal.http2.StreamResetException;
 import okhttp3.sse.*;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.io.PrintWriter;
@@ -27,12 +28,12 @@ public class SSESource extends RichSourceFunction<String> {
     public static final String CONFIG_PROPERTY_READ_TIMEOUT_MS = "readTimeoutMS";
     public static final String CONFIG_PROPERTY_REPORT_MESSAGE_RECEIVED_MS = "reportMessagesReceivedMS";
 
-    private Properties configProps;
+    private final Properties configProps;
     private volatile boolean isRunning = true;
     private volatile boolean isConnected = false;
-    private Logger logger;
+    private final Logger logger;
     private int readTimeoutMS = 0;
-    private long messagesReceived = 0l;
+    private long messagesReceived = 0L;
     private long reportMessagesReceivedMS = 0;
 
     public SSESource(Properties configProps, Logger logger) {
@@ -60,7 +61,7 @@ public class SSESource extends RichSourceFunction<String> {
         logger.info("SSESource report messages received MS: " + reportMessagesReceivedMS);
 
         while (isRunning) {
-            messagesReceived = 0l; //reset the number of messages received since last connect
+            messagesReceived = 0L; //reset the number of messages received since last connect
             OkHttpClient client = new OkHttpClient.Builder()
                     .readTimeout(readTimeoutMS, TimeUnit.MILLISECONDS)
                     .retryOnConnectionFailure(true)
@@ -88,12 +89,12 @@ public class SSESource extends RichSourceFunction<String> {
             logger.info("SSESource connected");
             try {
                 long startTime = System.currentTimeMillis();
-                // while we are connected and running we need to hold this thread and report messages recieved if that option is enabled.
+                // while we are connected and running we need to hold this thread and report messages received if that option is enabled.
                 // SSE events are sent via a callback in another thread
                 while (isRunning && isConnected) {
                     Thread.sleep(100);
                     long endTime = System.currentTimeMillis();
-                    if (reportMessagesReceivedMS > 0 && ((endTime - startTime) > reportMessagesReceivedMS)) {
+                    if (reportMessagesReceivedMS > 0 && (endTime - startTime > reportMessagesReceivedMS)) {
                         logger.info("SSERate received [" + messagesReceived + "] events between [" + startTime + "] and [" + endTime + "]");
                         startTime = endTime;
                     }
@@ -115,9 +116,9 @@ public class SSESource extends RichSourceFunction<String> {
      * This call will handle the actual SSE events and publish them to the Kinesis Data Streams stream via the collect call
      */
     public final class EventSourceSender extends EventSourceListener {
-        Logger logger;
-        SourceContext<String> sourceContext;
-        List<String> collectTypes;
+        final Logger logger;
+        final SourceContext<String> sourceContext;
+        final List<String> collectTypes;
 
         public EventSourceSender(SourceContext<String> sourceContext, Logger logger, List<String> collectTypes) {
             this.sourceContext = sourceContext;
@@ -130,7 +131,7 @@ public class SSESource extends RichSourceFunction<String> {
          * @param eventSource the event source
          * @param response the response
          */
-        @Override public void onOpen(EventSource eventSource, Response response) {
+        @Override public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
             logger.info("SSESource open");
         }
 
@@ -141,7 +142,7 @@ public class SSESource extends RichSourceFunction<String> {
          * @param type The type of the event which is used to filter
          * @param data The event data
          */
-        @Override public void onEvent(EventSource eventSource, String id, String type, String data) {
+        @Override public void onEvent(@NotNull EventSource eventSource, String id, String type, @NotNull String data) {
             if (collectTypes == null || collectTypes.contains(type)) {
                 if (reportMessagesReceivedMS > 0) {
                     messagesReceived++;
@@ -154,7 +155,7 @@ public class SSESource extends RichSourceFunction<String> {
          * When the connection is closed we receive this even which is currently only logged.
          * @param eventSource The event source
          */
-        @Override public void onClosed(EventSource eventSource) {
+        @Override public void onClosed(@NotNull EventSource eventSource) {
             logger.info("SSESource closed");
         }
 
@@ -166,14 +167,16 @@ public class SSESource extends RichSourceFunction<String> {
          * @param response The response
          */
         @Override
-        public void onFailure(EventSource eventSource, Throwable t, Response response) {
-            logger.error("SSESource Error: " + t.getMessage());
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            t.printStackTrace(pw);
-            logger.error("SSESource Error Trace: " + sw.toString());
-            if (t instanceof StreamResetException && t.getMessage().contains("NO_ERROR")) {
-                isConnected = false;
+        public void onFailure(@NotNull EventSource eventSource, Throwable t, Response response) {
+            if (t != null) {
+                logger.error("SSESource Error: " + t.getMessage());
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                t.printStackTrace(pw);
+                logger.error("SSESource Error Trace: " + sw);
+                if (t instanceof StreamResetException && t.getMessage().contains("NO_ERROR")) {
+                    isConnected = false;
+                }
             }
         }
     }

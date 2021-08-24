@@ -30,12 +30,12 @@ public class SSEConsumer {
         return sink;
     }
 
-    private static DataStream<String> createSourceFromApplicationProperties(StreamExecutionEnvironment env, Logger logger) throws IOException {
+    private static DataStream<String> createSourceFromApplicationProperties(final StreamExecutionEnvironment env, final Logger logger) throws IOException {
         Map<String, Properties> applicationProperties = KinesisAnalyticsRuntime.getApplicationProperties();
         return env.addSource(new SSESource(applicationProperties.get(SSE_SOURCE_PROPERTIES), logger)).name("SSE Source").uid("SSE Source").setParallelism(1);
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
         Logger logger = LoggerFactory.getLogger(SSEConsumer.class);
         // set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();

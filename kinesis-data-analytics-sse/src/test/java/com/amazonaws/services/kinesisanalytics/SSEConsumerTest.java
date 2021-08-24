@@ -12,14 +12,11 @@ import org.slf4j.LoggerFactory;
 import java.util.Properties;
 
 public class SSEConsumerTest {
-    Logger logger = LoggerFactory.getLogger(SSEConsumerTest.class);
-    private volatile boolean isRunning = true;
-
-    private String url;
+    final Logger logger = LoggerFactory.getLogger(SSEConsumerTest.class);
 
     @Test
     public void testSSE() throws Exception {
-        url = "https://stream.wikimedia.org/v2/stream/recentchange";
+        String url = "https://stream.wikimedia.org/v2/stream/recentchange";
 
         Properties configProps = new Properties();
         configProps.setProperty(SSESource.CONFIG_PROPERTY_URL, url);
@@ -30,7 +27,7 @@ public class SSEConsumerTest {
         SSESource source = new SSESource(configProps, logger);
         Thread t = new Thread(() -> {
             try {
-                source.run(new SourceFunction.SourceContext<String>() {
+                source.run(new SourceFunction.SourceContext<>() {
                     @Override
                     public void collect(String s) {
                         logger.info("Collected data: " + s);
@@ -63,7 +60,7 @@ public class SSEConsumerTest {
                     }
                 });
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error(e.getMessage());
             }
         });
         logger.info("Starting Run");

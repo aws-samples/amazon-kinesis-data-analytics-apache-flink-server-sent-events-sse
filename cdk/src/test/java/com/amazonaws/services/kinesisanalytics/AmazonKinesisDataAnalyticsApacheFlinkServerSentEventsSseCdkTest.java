@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class AmazonKinesisDataAnalyticsApacheFlinkServerSentEventsSseCdkTest {
     private final static ObjectMapper JSON =
