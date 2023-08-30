@@ -1,4 +1,8 @@
-# Ingest Server-Sent Events (SSE) using Amazon Kinesis Data Analytics with Apache Flink
+# Ingest Server-Sent Events (SSE) using Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics)
+
+--------
+>  #### 🚨 August 30, 2023: Amazon Kinesis Data Analytics has been renamed to [Amazon Managed Service for Apache Flink](https://aws.amazon.com/managed-service-apache-flink).
+--------
 
 When dealing with real-time data it is often required to send that data over the internet to various sources. Various technologies have enabled this such as web sockets and long polling. Recently server-sent events (SSE) has become a popular technology to push updates to clients. Ingesting this type of data source into AWS requires a client to be running continuously to receive those events. This sample shows how to connect to an SSE endpoint using an <a href="https://aws.amazon.com/kinesis/data-analytics/">Amazon Kinesis Data Analytics</a> application using Apache Flink. As the events arrive they are published to an <a href="https://aws.amazon.com/kinesis/data-streams/">Amazon Kinesis Data Streams</a> stream then in this sample we simply store the event data in <a href="https://aws.amazon.com/s3/">Amazon S3</a>.
 
